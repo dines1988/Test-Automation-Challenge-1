@@ -1,0 +1,12 @@
+{
+  "name": "test-automation",
+  "description": "test automation challenge using test cafe",
+  "dependencies": {
+    "cucumber": "^5.1.0",
+    "cucumber-html-reporter": "^2.0.3",
+    "npm": "^6.0.0",
+    "papaparse": "^5.3.0",
+    "testcafe": "^1.1.0",
+    "xpath-to-css": "^1.0.5"
+  }
+}
