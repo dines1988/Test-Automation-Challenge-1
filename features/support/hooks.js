@@ -7,7 +7,7 @@
 const fs = require('fs');
 const createTestCafe = require('testcafe');
 const testControllerHolder = require('./testControllerHolder');
-const {AfterAll, setDefaultTimeout, Before, After} = require('cucumber');
+const {AfterAll, setDefaultTimeout, Before, After, BeforeAll} = require('cucumber');
 const timeout = 100000;
 const {Selector} = require('testcafe');
 let cafeRunner = null;
@@ -53,8 +53,13 @@ setDefaultTimeout(timeout);
 4. Then, it calls the waitForTestController of cucumberWorld.js to add testController to Cucumber’s world scope.
 5. Then, it also maximizes the test controller window.
 */
-Before(function() {
+BeforeAll(function() {
     runTest(n,'chrome');
+});
+
+
+Before(function() {
+    //runTest(n,'chrome');
     createTestFile();
     n += 2;
     return this.waitForTestController.then(function(testController) {
@@ -64,15 +69,18 @@ Before(function() {
 
 // After hook runs after each Cucumber test. It is used to unlink the test and make testController "null".
 // It calls the testControllerHolder.free function. 
-After(function() {
+/*After(function() {
     fs.unlinkSync('cucumbertest.js');
     testControllerHolder.free();
-});
+});*/
 
 // AfterAll hook runs after all the tests execution. It check the last runs status to be "test-done-confirmation",
 // and then, close the cafeRunner and exit the process.
 // It checks with a wait timeout of 500.
 AfterAll(async function() {
+
+    fs.unlinkSync('cucumbertest.js');
+    testControllerHolder.free();
 
     let intervalId = null;
     function waitForTestCafe() {

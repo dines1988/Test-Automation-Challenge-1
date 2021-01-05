@@ -2,12 +2,19 @@ const duckduckPage = require('../support/pages/duckduck_homepageObjects.js');
 const settingsPage = require('../support/pages/duckduck_settingspageObjects.js');
 const trafficPage = require('../support/pages/duckduck_trafficpageObjects.js');
 const {Given, When, Then} = require('cucumber');
-const { Selector } = require('testcafe');
-let i = 0;
+const { Selector, ClientFunction } = require('testcafe');
+const userData = require("../support/Data/searchdata.json");
+
+let i,j = 0;
+var x = true;
 
 //AC1: verify logo present in duckduckgo homepage
 Given('I am on the homepage', async function () {
+  if (x)
+  {
+    x= false;
     await testController.navigateTo('https://start.duckduckgo.com/'); 
+  }
   });
 
 When('I look at the page', async function () {
@@ -86,6 +93,10 @@ Then('I should get 10 results on the results page', async function () {
   const linkCount = await duckduckPage.elements.searchResultLinks().count;
   console.log('number of search results   -- ' + linkCount);
   await testController.expect(linkCount).gte(10,'Number of links displayed is not matching with expected count');
+  
+  //go back to homepage
+  await testController.navigateTo('https://start.duckduckgo.com/'); 
+
 });
 
 //AC7: verify logo present in duckduckgo homepage
@@ -113,8 +124,46 @@ Then('I should see all the months listed in the order from Dec to Jan', async fu
     console.log('number of search results   -- ' + month);
     await testController.expect(actualRes).eql(month);
   }   
+  
   });
 
 Then('the Total Direct Queries should be equal to the sum of all the total directs from each month', async function () {
   await testController.wait(3000);
+
+  for(j=0; j<12;j++)
+  {
+    total = 0;
+    await testController.click(trafficPage.elements.expandMonth().nth(j));
+    await testController.wait(3000);
+    await testController.hover(trafficPage.elements.findElementByText('2017 Traffic'));
+    var actualRes = await trafficPage.elements.dateTotals().count;
+    for(i=0; i<actualRes;i++)
+    {
+      var actualResult = await trafficPage.elements.dateTotals().nth(i).innerText;
+      //console.log("test: " + actualResult.replace(/,/g, ''));
+      var totQ = parseInt(actualResult.replace(/,/g, ''));
+      var total = totQ+total;
+    }
+    console.log("test total: " + total);
+    await testController.click(trafficPage.elements.collapseMonth());
+  } 
+
+});
+
+/*
+When('I go to the homepage and enter "Test"', async function(table) {
+   //testController.typeText(duckduckPage.elements.searchTextBox(),table);
+   var dat = table.rows();
+   for(i=1; i<=dat.length;i++)
+   {
+    await testController.typeText(duckduckPage.elements.searchTextBox(),dat.toString());
+    console.log('number of search results   -- ' + dat[i]);
+   }
+  
+});*/
+
+//AC6: verify results with multiple test data
+When('I go to the homepage and type {string}', async function(sample) {
+  await testController.typeText(duckduckPage.elements.searchTextBox(),sample);
+  
 });
